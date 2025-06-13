@@ -1,28 +1,36 @@
+# Archivo docker-compose.yml
+# Este archivo define y configura los servicios necesarios para ejecutar la aplicación de la clínica veterinaria.
+# Incluye la aplicación principal (app_vet) y la base de datos MySQL (clinica_vet).
+#
+# Servicios:
+# - app_vet: Servicio de la aplicación Spring Boot, expone el puerto 8080 y depende de la base de datos.
+# - clinica_vet: Servicio de base de datos MySQL, expone el puerto 3307 y define credenciales y base de datos inicial.
+#
 version: '3'
 
 services:
   app_vet:
-    build: ./clinica_veterinaria
+    build: ./clinica_veterinaria  # Construye la imagen Docker usando el Dockerfile ubicado en ./clinica_veterinaria
     ports:
-      - "8080:8080"
+      - "8080:8080"              # Expone el puerto 8080 del contenedor al 8080 del host
     environment:
-      DB_URL: jdbc:mysql://clinica_vet:3306/clinica_veterinaria?createDatabaseIfNotExist=true&serverTimezone=UTC
-      DB_USER_NAME: root
-      DB_PASSWORD: 1132
-    restart: always
+      DB_URL: jdbc:mysql://clinica_vet:3306/clinica_veterinaria?createDatabaseIfNotExist=true&serverTimezone=UTC  # URL de conexión a la base de datos MySQL
+      DB_USER_NAME: root         # Usuario de la base de datos
+      DB_PASSWORD: 1132          # Contraseña de la base de datos
+    restart: always              # Reinicia el contenedor automáticamente si falla
     depends_on:
       clinica_vet:
-        condition: service_healthy
+        condition: service_healthy  # Espera a que el servicio de base de datos esté saludable antes de iniciar
   clinica_vet:
-    image: mysql:8.0.33
+    image: mysql:8.0.33           # Utiliza la imagen oficial de MySQL versión 8.0.33
     ports:
-      - "3307:3306"
+      - "3307:3306"              # Expone el puerto 3306 del contenedor como 3307 en el host
     environment:
-      MYSQL_ROOT_PASSWORD: 1132
-      MYSQL_PASSWORD: 1132
-      MYSQL_DATABASE: clinica_veterinaria
-    restart: always
+      MYSQL_ROOT_PASSWORD: 1132   # Contraseña del usuario root de MySQL
+      MYSQL_PASSWORD: 1132        # Contraseña del usuario estándar de MySQL
+      MYSQL_DATABASE: clinica_veterinaria  # Nombre de la base de datos a crear al iniciar el contenedor
+    restart: always               # Reinicia el contenedor automáticamente si falla
     healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
-      timeout: 10s
-      retries: 10
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]  # Comando para verificar que MySQL está activo
+      timeout: 10s                # Tiempo máximo de espera para la verificación de salud
+      retries: 10                 # Número de intentos antes de marcar el servicio como no saludable
